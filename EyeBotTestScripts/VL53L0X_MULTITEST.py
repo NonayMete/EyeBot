@@ -1,3 +1,5 @@
+import time
+import VL53L0X
 import smbus
 #this class is a library that can just be imported too
 
@@ -98,15 +100,49 @@ class PCF8574(object):
         return bool(state & 1<<pin_number)
 
 
-#from pcf8574 import PCF8574
 i2c_port_num = 1 #I2C bus 1 on the pi
-
 pcf_address = 0x20 #default I2C address, for the PCF controlling distance sensors
-
 pcf = PCF8574(i2c_port_num, pcf_address)
 
-pcf.port = [False, False, False, False, False, False, False, False] #set ports as list P0-7
-pcf.port[4] = True #or individually
-print(pcf.port[0]) #returns state of port
-print(pcf.port) #returns state of P0-7 as a list
+pcf.port = [False, False, False, False, False, False, False, False] #reset all TOF sensors
+
+pcf.port[4] = True #enable U12
+time.sleep(0.01) #wait for sensor to boot
+# Create a VL53L0X object
+right_tof = VL53L0X.VL53L0X(i2c_bus=1,i2c_address=0x29)
+# I2C Address can change before tof.open()
+right_tof.change_address(0x32)
+right_tof.open()
+# Start ranging
+right_tof.start_ranging(VL53L0X.Vl53l0xAccuracyMode.BETTER)
+
+pcf.port[2] = True #enable U11
+time.sleep(0.01)
+# Create a VL53L0X object
+back_tof = VL53L0X.VL53L0X(i2c_bus=1,i2c_address=0x29)
+# I2C Address can change before tof.open()
+back_tof.change_address(0x31)
+back_tof.open()
+# Start ranging
+back_tof.start_ranging(VL53L0X.Vl53l0xAccuracyMode.BETTER)
+
+timing = right_tof.get_timing()
+if timing < 20000:
+    timing = 20000
+print("Timing %d ms" % (timing/1000))
+
+while 1:
+    for count in range(1, 101):
+        right_distance = right_tof.get_distance()
+        time.sleep(timing/1000000.00)
+        back_distance = back_tof.get_distance()
+        time.sleep(timing/1000000.00)
+        print("BACK: %d mm, %d cm,     RIGHT: %d mm, %d cm, %d" % (back_distance, (back_distance/10), right_distance, (right_distance/10), count))
+        
+        
+right_tof.stop_ranging()
+back_tof.stop_ranging()
+
+right_tof.close()
+back_tof.close()
 
