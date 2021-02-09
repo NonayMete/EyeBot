@@ -106,7 +106,7 @@ pcf_address = 0x20 #default I2C address, for the PCF controlling distance sensor
 pcf = PCF8574(i2c_port_num, pcf_address)
 
 pcf.port = [False, False, False, False, False, False, False, False] #reset TOF sensors
-pcf.port[2] = True #enable U11
+pcf.port[6] = True #enable U10
 time.sleep(0.1) #wait for sensor to boot
 
 # Create a VL53L0X object

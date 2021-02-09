@@ -14,7 +14,7 @@ while True:
     data = float(data) / 1024 #fraction of max voltage (5V)
     data *= 5.0 #voltage entering Ain Pin
     data /= 0.319728 #voltage entering ADC is put through devider, this gives us battery voltage
-    data *= 1.035 #error cancellation
+    data *= 1.0 #error cancellation
     data = round(data, 2) #only 2 decimal places
     t = round(t,1)
     print(t, "s:", data)

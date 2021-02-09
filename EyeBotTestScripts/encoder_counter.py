@@ -99,22 +99,92 @@ class PCF8574(object):
         #return bool(state & 1<<7-pin_number)
         return bool(state & 1<<pin_number)
 
+def clear_counters():
+    control.port[3] = False
+    control.port[3] = True
+
+def update_data():
+    control.port[2] = False
+    control.port[2] = True
+    
+def GAU():
+    control.port[7] = True
+    control.port[6] = True
+    control.port[5] = False
+    control.port[4] = True
+    
+def GAL():
+    control.port[7] = True
+    control.port[6] = True
+    control.port[5] = True
+    control.port[4] = False
+    
+def GBU():
+    control.port[7] = False
+    control.port[6] = True
+    control.port[5] = True
+    control.port[4] = True
+    
+def GBL():
+    control.port[7] = True
+    control.port[6] = False
+    control.port[5] = True
+    control.port[4] = True
+    
+def get_counter_A():
+    GAU()
+    upper = data.port
+    upper.reverse()
+    n = 15
+    count = 0
+    for bit in upper:
+        if bit:
+            count += pow(2, n)
+        n-=1
+    GAL()
+    lower = data.port
+    n = 7
+    for bit in lower:
+        if bit:
+            count += pow(2, n)
+        n-=1
+    return count
+
+def get_counter_B():
+    GBU()
+    upper = data.port
+    upper.reverse()
+    n = 15
+    count = 0
+    for bit in upper:
+        if bit:
+            count += pow(2, n)
+        n-=1
+    GBL()
+    lower = data.port
+    n = 7
+    for bit in lower:
+        if bit:
+            count += pow(2, n)
+        n-=1
+    return count
+
 i2c_port_num = 1 #I2C bus 1 on the pi
-pcf_address = 0x20 #default I2C address, for the PCF controlling distance sensors #U7
-pcf1 = PCF8574(i2c_port_num, pcf_address)
-
 pcf_address = 0x27 #U4
-pcf2 = PCF8574(i2c_port_num, pcf_address)
-
+data = PCF8574(i2c_port_num, pcf_address)
 pcf_address = 0x21 #U1
-pcf3 = PCF8574(i2c_port_num, pcf_address)
+control = PCF8574(i2c_port_num, pcf_address)
 
-
-#pcf3.port = [True, True, True, True, True, True, True, True] #set ports as list P0-7
-pcf3.port = [False, False, False, False, False, False, False, False]
-#pcf1.port[7] = True #or individually
-#print(pcf1.port[0]) #returns state of port
+data.port = [True, True, True, True, True, True, True, True] #set ports as inputs
+control.port = [True, True, True, True, True, True, True, True]
+clear_counters()
 while 1:
-    #print(pcf1.port) #returns state of P0-7 as a list
-    print(pcf3.port)
-    time.sleep(2)
+    update_data()
+    #GBL()
+    #print(data.port)
+    Acount = get_counter_A()
+    Bcount = get_counter_B()
+    print("Counter A: %d,  Counter B: %d" % (Acount, Bcount))
+    #print("Counter B: %d" % (get_counter_B()))
+    time.sleep(1)
+

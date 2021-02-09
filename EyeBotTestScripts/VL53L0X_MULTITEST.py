@@ -126,6 +126,16 @@ back_tof.open()
 # Start ranging
 back_tof.start_ranging(VL53L0X.Vl53l0xAccuracyMode.BETTER)
 
+pcf.port[6] = True #enable U10
+time.sleep(0.01)
+# Create a VL53L0X object
+front_tof = VL53L0X.VL53L0X(i2c_bus=1,i2c_address=0x29)
+# I2C Address can change before tof.open()
+front_tof.change_address(0x30)
+front_tof.open()
+# Start ranging
+front_tof.start_ranging(VL53L0X.Vl53l0xAccuracyMode.BETTER)
+
 timing = right_tof.get_timing()
 if timing < 20000:
     timing = 20000
@@ -135,9 +145,11 @@ while 1:
     for count in range(1, 101):
         right_distance = right_tof.get_distance()
         time.sleep(timing/1000000.00)
+        front_distance = front_tof.get_distance()
+        time.sleep(timing/1000000.00)
         back_distance = back_tof.get_distance()
         time.sleep(timing/1000000.00)
-        print("BACK: %d mm, %d cm,     RIGHT: %d mm, %d cm, %d" % (back_distance, (back_distance/10), right_distance, (right_distance/10), count))
+        print("BACK: %d mm, %d cm,  FRONT: %d mm, %d cm,  RIGHT: %d mm, %d cm, %d" % (back_distance, (back_distance/10), front_distance, (front_distance/10), right_distance, (right_distance/10), count))
         
         
 right_tof.stop_ranging()
