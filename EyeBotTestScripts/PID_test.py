@@ -154,7 +154,7 @@ while 1:
         
 
         
-    if(direction < 0):
+    if(output < 0):
         MA1.ChangeDutyCycle(abs(output))
         MB1.ChangeDutyCycle(abs(output))
         MA2.ChangeDutyCycle(0)
