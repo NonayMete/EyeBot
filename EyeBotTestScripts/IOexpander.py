@@ -1,7 +1,5 @@
 import smbus
 import time
-#from pcf8574 import PCF8574
-#this class is a library that can just be imported too
 
 class IOPort(list):
     """
