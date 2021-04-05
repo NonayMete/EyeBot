@@ -2,11 +2,12 @@ import time
 from simple_pid import PID
 from EncoderCounter import Counter
 from MotorDriver import MotorDriver
-import RPi.GPIO as GPIO
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(19, GPIO.OUT)
-
+class DrivePID():
+    def __init__(self, P, I, D):
+        
+        
+        
 counter = Counter()
 drive = MotorDriver()
 
@@ -101,3 +102,4 @@ while 1:
     last_dB = dB
     last_dA = dA
     drive.set_speed(outputA, outputB)
+
